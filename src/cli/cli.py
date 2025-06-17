@@ -3,7 +3,7 @@ import sys
 import os
 
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(_file_))))
 
 from clinica import Clinica
 from paciente import Paciente
@@ -23,7 +23,7 @@ from excepciones import (
 
 
 class CLI:
-    def __init__(self):
+    def _init_(self):
         self.clinica = Clinica()
 
     def mostrar_menu(self):
@@ -347,5 +347,5 @@ def main():
     cli.ejecutar()
 
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     main()
