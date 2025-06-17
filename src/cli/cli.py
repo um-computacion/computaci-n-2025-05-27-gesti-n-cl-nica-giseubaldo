@@ -1,14 +1,17 @@
 from datetime import datetime
 import sys
+import src 
 import os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, src_path)
 
-from clinica import Clinica
-from paciente import Paciente
-from medico import Medico
-from especialidad import Especialidad
-from excepciones import (
+
+from src.clinica import Clinica
+from src.paciente import Paciente
+from src.medico import Medico
+from src.especialidad import Especialidad
+from src.excepciones import (
     PacienteNoEncontradoException,
     MedicoNoEncontradoException,
     MedicoNoDisponibleException,

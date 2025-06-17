@@ -17,6 +17,6 @@ class TestEspecialidad(unittest.TestCase):
         self.assertIn("Pediatría", str(self.especialidad))
         self.assertIn("lunes", str(self.especialidad))
 
-if _name_ == "_main_":
+if __name__ == "_main_":
    unittest.main()
 
