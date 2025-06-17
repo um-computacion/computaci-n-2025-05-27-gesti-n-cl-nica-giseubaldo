@@ -2,34 +2,118 @@ import unittest
 
 from src.medico import Medico
 from src.especialidad import Especialidad
+from src.excepciones import DatosInvalidosException
 
 
 class TestMedico(unittest.TestCase):
 
-    def setUp(self):
-        self.medico = Medico("Carlos López", "M1234")
-        self.pediatria = Especialidad("Pediatría", ["lunes", "miércoles"])
-        self.cardiologia = Especialidad("Cardiología", ["martes"])
+    def test_crear_medico_valido(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        self.assertEqual(medico.obtener_matricula(), "M12345")
+        self.assertEqual(medico.obtener_nombre(), "Dr. Juan Pérez")
 
-    def test_obtener_matricula(self):
-        self.assertEqual(self.medico.obtener_matricula(), "M1234")
+    def test_crear_medico_sin_nombre(self):
+        with self.assertRaises(DatosInvalidosException):
+            Medico("", "M12345")
 
-    def test_agregar_especialidad(self):
-        self.medico.agregar_especialidad(self.pediatria)
-        self.assertEqual(self.medico._especialidades[0].obtener_especialidad(), "Pediatría")
+        with self.assertRaises(DatosInvalidosException):
+            Medico(None, "M12345")
 
-    def test_especialidad_para_dia_existente(self):
-        self.medico.agregar_especialidad(self.pediatria)
-        self.assertEqual(self.medico.obtener_especialidad_para_dia("LUNES"), "Pediatría")
+    def test_crear_medico_sin_matricula(self):
+        with self.assertRaises(DatosInvalidosException):
+            Medico("Dr. Juan Pérez", "")
 
-    def test_especialidad_para_dia_inexistente(self):
-        self.medico.agregar_especialidad(self.pediatria)
-        self.assertIsNone(self.medico.obtener_especialidad_para_dia("viernes"))
+        with self.assertRaises(DatosInvalidosException):
+            Medico("Dr. Juan Pérez", None)
 
-    def test_multiple_especialidades(self):
-        self.medico.agregar_especialidad(self.pediatria)
-        self.medico.agregar_especialidad(self.cardiologia)
-        self.assertEqual(self.medico.obtener_especialidad_para_dia("martes"), "Cardiología")
+    def test_tipos_datos_invalidos(self):
+        with self.assertRaises(DatosInvalidosException):
+            Medico(123, "M12345")
+
+        with self.assertRaises(DatosInvalidosException):
+            Medico("Dr. Juan Pérez", 12345)
+
+    def test_agregar_especialidad_valida(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        especialidad = Especialidad("Pediatría", ["lunes", "miércoles", "viernes"])
+
+        medico.agregar_especialidad(especialidad)
+
+        self.assertEqual(medico.obtener_especialidad_para_dia("lunes"), "Pediatría")
+        self.assertEqual(medico.obtener_especialidad_para_dia("miércoles"), "Pediatría")
+        self.assertEqual(medico.obtener_especialidad_para_dia("viernes"), "Pediatría")
+
+    def test_obtener_especialidad_dia_no_disponible(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        especialidad = Especialidad("Pediatría", ["lunes", "miércoles"])
+        medico.agregar_especialidad(especialidad)
+
+        self.assertIsNone(medico.obtener_especialidad_para_dia("martes"))
+        self.assertIsNone(medico.obtener_especialidad_para_dia("domingo"))
+
+    def test_agregar_especialidad_duplicada(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        especialidad1 = Especialidad("Pediatría", ["lunes"])
+        especialidad2 = Especialidad("Pediatría", ["martes"])
+
+        medico.agregar_especialidad(especialidad1)
+
+        with self.assertRaises(DatosInvalidosException):
+            medico.agregar_especialidad(especialidad2)
+
+    def test_agregar_especialidad_tipo_invalido(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+
+        with self.assertRaises(DatosInvalidosException):
+            medico.agregar_especialidad("Pediatría")
+
+        with self.assertRaises(DatosInvalidosException):
+            medico.agregar_especialidad(None)
+
+    def test_multiples_especialidades(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        pediatria = Especialidad("Pediatría", ["lunes", "miércoles"])
+        cardiologia = Especialidad("Cardiología", ["martes", "jueves"])
+
+        medico.agregar_especialidad(pediatria)
+        medico.agregar_especialidad(cardiologia)
+
+        self.assertEqual(medico.obtener_especialidad_para_dia("lunes"), "Pediatría")
+        self.assertEqual(medico.obtener_especialidad_para_dia("martes"), "Cardiología")
+        self.assertEqual(medico.obtener_especialidad_para_dia("miércoles"), "Pediatría")
+        self.assertEqual(medico.obtener_especialidad_para_dia("jueves"), "Cardiología")
+
+    def test_obtener_especialidades(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        pediatria = Especialidad("Pediatría", ["lunes"])
+        cardiologia = Especialidad("Cardiología", ["martes"])
+
+        medico.agregar_especialidad(pediatria)
+        medico.agregar_especialidad(cardiologia)
+
+        especialidades = medico.obtener_especialidades()
+        self.assertEqual(len(especialidades), 2)
+
+        especialidades.clear()
+        self.assertEqual(len(medico.obtener_especialidades()), 2)
+
+    def test_representacion_medico_sin_especialidades(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        representacion = str(medico)
+        self.assertIn("Dr/a. Dr. Juan Pérez", representacion)
+        self.assertIn("M12345", representacion)
+        self.assertIn("Sin especialidades asignadas", representacion)
+
+    def test_representacion_medico_con_especialidades(self):
+        medico = Medico("Dr. Juan Pérez", "M12345")
+        especialidad = Especialidad("Pediatría", ["lunes", "miércoles"])
+        medico.agregar_especialidad(especialidad)
+
+        representacion = str(medico)
+        self.assertIn("Dr/a. Dr. Juan Pérez", representacion)
+        self.assertIn("M12345", representacion)
+        self.assertIn("Pediatría", representacion)
+        self.assertNotIn("Sin especialidades asignadas", representacion)
 
 
 if __name__ == "__main__":
