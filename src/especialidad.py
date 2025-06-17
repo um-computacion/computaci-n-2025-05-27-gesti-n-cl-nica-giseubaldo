@@ -12,3 +12,5 @@ class Especialidad:
     def __str__(self):
         dias_str = ", ".join(self._dias)
         return f"{self._tipo} (Días: {dias_str})"
+    
+    
