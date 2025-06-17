@@ -2,7 +2,7 @@ from datetime import datetime
 import sys
 import os
 
-# Agregar el directorio padre al path para importar los módulos
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from clinica import Clinica
