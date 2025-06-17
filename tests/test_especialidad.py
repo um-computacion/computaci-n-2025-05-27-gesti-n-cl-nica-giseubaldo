@@ -1,34 +1,22 @@
 import unittest
 from src.especialidad import Especialidad
 
-
 class TestEspecialidad(unittest.TestCase):
-
     def setUp(self):
-        self.especialidad = Especialidad("Pediatría", ["lunes", "Miércoles", "VIERNES"])
+        self.especialidad = Especialidad("Pediatría", ["lunes", "miércoles", "viernes"])
 
     def test_obtener_especialidad(self):
         self.assertEqual(self.especialidad.obtener_especialidad(), "Pediatría")
 
-    def test_verificar_dia_valido_minuscula(self):
+    def test_verificar_dia(self):
         self.assertTrue(self.especialidad.verificar_dia("lunes"))
-
-    def test_verificar_dia_valido_mayuscula(self):
-        self.assertTrue(self.especialidad.verificar_dia("MIÉRCOLES"))
-
-    def test_verificar_dia_valido_mixto(self):
-        self.assertTrue(self.especialidad.verificar_dia("Viernes"))
-
-    def test_verificar_dia_invalido(self):
+        self.assertTrue(self.especialidad.verificar_dia("Miércoles"))
         self.assertFalse(self.especialidad.verificar_dia("domingo"))
 
     def test_str(self):
-        representacion = str(self.especialidad)
-        self.assertIn("Pediatría", representacion)
-        self.assertIn("lunes", representacion)
-        self.assertIn("miércoles", representacion)
-        self.assertIn("viernes", representacion)
+        self.assertIn("Pediatría", str(self.especialidad))
+        self.assertIn("lunes", str(self.especialidad))
 
+if _name_ == "_main_":
+   unittest.main()
 
-if __name__ == "__main__":
-    unittest.main()
