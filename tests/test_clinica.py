@@ -249,5 +249,5 @@ class TestClinica(unittest.TestCase):
         return datetime(2024, 11, 5, 10, 0)
 
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     unittest.main()

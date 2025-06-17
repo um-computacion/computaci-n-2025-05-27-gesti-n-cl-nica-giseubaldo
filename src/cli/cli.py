@@ -2,7 +2,6 @@ from datetime import datetime
 import sys
 import os
 
-# Agregar el directorio padre al path para importar los módulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from clinica import Clinica
@@ -23,6 +22,7 @@ from excepciones import (
 
 
 class CLI:
+    
     def __init__(self):
         self.clinica = Clinica()
 
@@ -89,8 +89,19 @@ class CLI:
         
         try:
             nombre = input("Nombre completo: ").strip()
+            if not nombre:
+                print("ERROR: El nombre no puede estar vacío.")
+                return
+                
             dni = input("DNI: ").strip()
+            if not dni:
+                print("ERROR: El DNI no puede estar vacío.")
+                return
+                
             fecha_nacimiento = input("Fecha de nacimiento (dd/mm/aaaa): ").strip()
+            if not fecha_nacimiento:
+                print("ERROR: La fecha de nacimiento no puede estar vacía.")
+                return
             
             paciente = Paciente(nombre, dni, fecha_nacimiento)
             self.clinica.agregar_paciente(paciente)
@@ -99,6 +110,8 @@ class CLI:
             
         except (DatosInvalidosException, PacienteDuplicadoException) as e:
             print(f"ERROR: {e}")
+        except Exception as e:
+            print(f"ERROR: Error al agregar paciente: {e}")
 
     def agregar_medico(self):
         """Solicita datos y agrega un médico."""
@@ -107,7 +120,14 @@ class CLI:
         
         try:
             nombre = input("Nombre completo: ").strip()
+            if not nombre:
+                print("ERROR: El nombre no puede estar vacío.")
+                return
+                
             matricula = input("Matrícula: ").strip()
+            if not matricula:
+                print("ERROR: La matrícula no puede estar vacía.")
+                return
             
             medico = Medico(nombre, matricula)
             
@@ -122,6 +142,8 @@ class CLI:
             
         except (DatosInvalidosException, MedicoDuplicadoException, EspecialidadDuplicadaException) as e:
             print(f"ERROR: {e}")
+        except Exception as e:
+            print(f"ERROR: Error al agregar médico: {e}")
 
     def _agregar_especialidades_interactivo(self, medico):
         """Agrega especialidades a un médico de forma interactiva."""
@@ -130,6 +152,7 @@ class CLI:
                 print("\nAgregando especialidad:")
                 tipo = input("Tipo de especialidad: ").strip()
                 if not tipo:
+                    print("Especialidad vacía, terminando...")
                     break
                 
                 print("Días de atención (separados por comas):")
@@ -137,6 +160,7 @@ class CLI:
                 dias_str = input("Días: ").strip()
                 
                 if not dias_str:
+                    print("Días vacíos, terminando...")
                     break
                 
                 dias = [dia.strip() for dia in dias_str.split(',')]
@@ -151,6 +175,8 @@ class CLI:
                     
             except (DatosInvalidosException, EspecialidadDuplicadaException) as e:
                 print(f"ERROR: {e}")
+            except Exception as e:
+                print(f"ERROR: Error al agregar especialidad: {e}")
 
     def agregar_especialidad(self):
         """Agrega una especialidad a un médico existente."""
@@ -169,12 +195,24 @@ class CLI:
                 print(f"{i}) Dr. {medico.obtener_nombre()} - Matrícula: {medico.obtener_matricula()}")
             
             matricula = input("\nMatrícula del médico: ").strip()
+            if not matricula:
+                print("ERROR: La matrícula no puede estar vacía.")
+                return
+                
             medico = self.clinica.obtener_medico_por_matricula(matricula)
             
             tipo = input("Tipo de especialidad: ").strip()
+            if not tipo:
+                print("ERROR: El tipo de especialidad no puede estar vacío.")
+                return
+                
             print("Días de atención (separados por comas):")
             print("Ejemplo: lunes,miércoles,viernes")
             dias_str = input("Días: ").strip()
+            
+            if not dias_str:
+                print("ERROR: Los días no pueden estar vacíos.")
+                return
             
             dias = [dia.strip() for dia in dias_str.split(',')]
             especialidad = Especialidad(tipo, dias)
@@ -184,6 +222,8 @@ class CLI:
             
         except (MedicoNoEncontradoException, DatosInvalidosException, EspecialidadDuplicadaException) as e:
             print(f"ERROR: {e}")
+        except Exception as e:
+            print(f"ERROR: Error al agregar especialidad: {e}")
 
     def agendar_turno(self):
         """Agenda un turno."""
@@ -202,6 +242,9 @@ class CLI:
                 print(f"- {paciente.obtener_nombre()} (DNI: {paciente.obtener_dni()})")
             
             dni = input("\nDNI del paciente: ").strip()
+            if not dni:
+                print("ERROR: El DNI no puede estar vacío.")
+                return
             
             # Mostrar médicos
             medicos = self.clinica.obtener_medicos()
@@ -217,11 +260,25 @@ class CLI:
                     print(f"  * {esp}")
             
             matricula = input("\nMatrícula del médico: ").strip()
+            if not matricula:
+                print("ERROR: La matrícula no puede estar vacía.")
+                return
+                
             especialidad = input("Especialidad: ").strip()
+            if not especialidad:
+                print("ERROR: La especialidad no puede estar vacía.")
+                return
             
             # Solicitar fecha y hora
             fecha_str = input("Fecha (dd/mm/aaaa): ").strip()
+            if not fecha_str:
+                print("ERROR: La fecha no puede estar vacía.")
+                return
+                
             hora_str = input("Hora (HH:MM): ").strip()
+            if not hora_str:
+                print("ERROR: La hora no puede estar vacía.")
+                return
             
             # Convertir a datetime
             fecha_hora_str = f"{fecha_str} {hora_str}"
@@ -233,8 +290,10 @@ class CLI:
         except (PacienteNoEncontradoException, MedicoNoEncontradoException, 
                 MedicoNoDisponibleException, TurnoOcupadoException, DatosInvalidosException) as e:
             print(f"ERROR: {e}")
-        except ValueError:
-            print("ERROR: Formato de fecha u hora inválido.")
+        except ValueError as e:
+            print(f"ERROR: Formato de fecha u hora inválido: {e}")
+        except Exception as e:
+            print(f"ERROR: Error al agendar turno: {e}")
 
     def emitir_receta(self):
         """Emite una receta médica."""
@@ -253,6 +312,9 @@ class CLI:
                 print(f"- {paciente.obtener_nombre()} (DNI: {paciente.obtener_dni()})")
             
             dni = input("\nDNI del paciente: ").strip()
+            if not dni:
+                print("ERROR: El DNI no puede estar vacío.")
+                return
             
             # Mostrar médicos
             medicos = self.clinica.obtener_medicos()
@@ -265,10 +327,20 @@ class CLI:
                 print(f"- Dr. {medico.obtener_nombre()} (Matrícula: {medico.obtener_matricula()})")
             
             matricula = input("\nMatrícula del médico: ").strip()
+            if not matricula:
+                print("ERROR: La matrícula no puede estar vacía.")
+                return
             
             print("Medicamentos (separados por comas):")
             medicamentos_str = input("Medicamentos: ").strip()
-            medicamentos = [med.strip() for med in medicamentos_str.split(',')]
+            if not medicamentos_str:
+                print("ERROR: Los medicamentos no pueden estar vacíos.")
+                return
+                
+            medicamentos = [med.strip() for med in medicamentos_str.split(',') if med.strip()]
+            if not medicamentos:
+                print("ERROR: Debe especificar al menos un medicamento válido.")
+                return
             
             self.clinica.emitir_receta(dni, matricula, medicamentos)
             print("OK: Receta emitida exitosamente.")
@@ -276,6 +348,8 @@ class CLI:
         except (PacienteNoEncontradoException, MedicoNoEncontradoException, 
                 RecetaInvalidaException, DatosInvalidosException) as e:
             print(f"ERROR: {e}")
+        except Exception as e:
+            print(f"ERROR: Error al emitir receta: {e}")
 
     def ver_historia_clinica(self):
         """Muestra la historia clínica de un paciente."""
@@ -294,57 +368,75 @@ class CLI:
                 print(f"- {paciente.obtener_nombre()} (DNI: {paciente.obtener_dni()})")
             
             dni = input("\nDNI del paciente: ").strip()
+            if not dni:
+                print("ERROR: El DNI no puede estar vacío.")
+                return
+                
             historia = self.clinica.obtener_historia_clinica(dni)
             
             print(f"\n{historia}")
             
         except PacienteNoEncontradoException as e:
             print(f"ERROR: {e}")
+        except Exception as e:
+            print(f"ERROR: Error al obtener historia clínica: {e}")
 
     def ver_turnos(self):
         """Muestra todos los turnos agendados."""
         print("\nTURNOS AGENDADOS")
         print("-" * 30)
         
-        turnos = self.clinica.obtener_turnos()
-        if not turnos:
-            print("No hay turnos agendados.")
-            return
-        
-        for i, turno in enumerate(turnos, 1):
-            print(f"{i}) {turno}")
+        try:
+            turnos = self.clinica.obtener_turnos()
+            if not turnos:
+                print("No hay turnos agendados.")
+                return
+            
+            for i, turno in enumerate(turnos, 1):
+                print(f"{i}) {turno}")
+        except Exception as e:
+            print(f"ERROR: Error al obtener turnos: {e}")
 
     def ver_pacientes(self):
         """Muestra todos los pacientes registrados."""
         print("\nPACIENTES REGISTRADOS")
         print("-" * 35)
         
-        pacientes = self.clinica.obtener_pacientes()
-        if not pacientes:
-            print("No hay pacientes registrados.")
-            return
-        
-        for i, paciente in enumerate(pacientes, 1):
-            print(f"{i}) {paciente}")
+        try:
+            pacientes = self.clinica.obtener_pacientes()
+            if not pacientes:
+                print("No hay pacientes registrados.")
+                return
+            
+            for i, paciente in enumerate(pacientes, 1):
+                print(f"{i}) {paciente}")
+        except Exception as e:
+            print(f"ERROR: Error al obtener pacientes: {e}")
 
     def ver_medicos(self):
         """Muestra todos los médicos registrados."""
         print("\nMEDICOS REGISTRADOS")
         print("-" * 35)
         
-        medicos = self.clinica.obtener_medicos()
-        if not medicos:
-            print("No hay médicos registrados.")
-            return
-        
-        for i, medico in enumerate(medicos, 1):
-            print(f"{i}) {medico}")
+        try:
+            medicos = self.clinica.obtener_medicos()
+            if not medicos:
+                print("No hay médicos registrados.")
+                return
+            
+            for i, medico in enumerate(medicos, 1):
+                print(f"{i}) {medico}")
+        except Exception as e:
+            print(f"ERROR: Error al obtener médicos: {e}")
 
 
 def main():
     """Función principal para ejecutar la CLI."""
-    cli = CLI()
-    cli.ejecutar()
+    try:
+        cli = CLI()
+        cli.ejecutar()
+    except Exception as e:
+        print(f"ERROR CRÍTICO: Error al inicializar el sistema: {e}")
 
 
 if __name__ == "__main__":
