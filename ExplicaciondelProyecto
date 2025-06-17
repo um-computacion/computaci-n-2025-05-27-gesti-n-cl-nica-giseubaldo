@@ -1,0 +1,280 @@
+# Sistema de Gestión Clínica
+
+## Cómo Ejecutar el Sistema
+
+### Requisitos Previos
+
+- Python 3.7 o superior
+
+### Estructura de Proyecto
+
+
+COMPUTACI-N-2025-05-27-GESTI-N-CL-NI.../
+│
+├── .github/
+├── src/
+│   ├── __pycache__/
+│   ├── __init__.py
+│   ├── clinica.py
+│   ├── especialidad.py
+│   ├── excepciones.py
+│   ├── historiaclinica.py
+│   ├── medico.py
+│   ├── paciente.py
+│   ├── receta.py
+│   └── turno.py
+│
+├── cli/
+│   ├── __pycache__/
+│   ├── __init__.py
+│   └── cli.py
+│
+├── tests/
+│   ├── __pycache__/
+│   ├── __init__.py
+│   ├── test_clinica.py
+│   ├── test_especialidad.py
+│   ├── test_historiaclinica.py
+│   ├── test_medico.py
+│   ├── test_paciente.py
+│   ├── test_receta.py
+│   └── test_turno.py
+│
+├── .gitignore
+└── README.md
+
+
+### Ejecución del Sistema
+
+*Ejecutar el sistema CLI:*
+
+bash
+# Opción 1: Ejecutar el módulo CLI
+python -m cli.cli
+
+# Opción 2: Ejecutar directamente el archivo
+python cli/cli.py
+#Opcion3: 
+python -m src.cli.cli
+
+### Uso del Sistema
+
+Una vez ejecutado, el sistema presenta un menú interactivo con las siguientes opciones:
+
+1. *Agregar paciente* - Registrar nuevo paciente con DNI y fecha de nacimiento
+1. *Agregar médico* - Registrar médico con matrícula y especialidades
+1. *Agendar turno* - Programar citas entre pacientes y médicos
+1. *Agregar especialidad a médico* - Añadir nuevas especialidades a médicos existentes
+1. *Emitir receta* - Crear prescripciones médicas
+1. *Ver historia clínica* - Consultar historial de un paciente
+1. *Ver todos los turnos* - Listar todas las citas programadas
+1. *Ver todos los pacientes* - Mostrar pacientes registrados
+1. *Ver todos los médicos* - Mostrar médicos y sus especialidades
+
+## Cómo Ejecutar las Pruebas
+
+### Estructura de Pruebas
+
+Las pruebas deben estar organizadas en el directorio tests/ con archivos que sigan el patrón test_*.py.
+
+### Ejecución con unittest
+
+bash
+# Ejecutar todas las pruebas desde el directorio raíz
+python -m unittest discover tests
+
+# Ejecutar pruebas específicas
+python -m unittest tests.test_clinica
+python -m unittest tests.test_paciente
+python -m unittest tests.test_medico
+python -m unittest tests.test_especialidad
+python -m unittest tests.test_turno
+python -m unittest tests.test_receta
+python -m unittest tests.test_historiaclinica
+
+# Ejecutar con verbosidad
+python -m unittest discover tests -v
+
+
+### Ejecución con pytest (si está instalado)
+
+bash
+# Instalar pytest
+pip install pytest
+
+# Ejecutar todas las pruebas
+pytest
+
+# Ejecutar con reporte de cobertura
+pip install pytest-cov
+pytest --cov=src
+
+
+### Ejemplos de Archivos de Prueba
+
+python
+# tests/test_paciente.py
+import unittest
+from src.paciente import Paciente
+from src.excepciones import DatosInvalidosException
+
+class TestPaciente(unittest.TestCase):
+    def test_crear_paciente_valido(self):
+        paciente = Paciente("Juan Pérez", "12345678", "01/01/1990")
+        self.assertEqual(paciente.obtener_nombre(), "Juan Pérez")
+        self.assertEqual(paciente.obtener_dni(), "12345678")
+    
+    def test_dni_invalido(self):
+        with self.assertRaises(DatosInvalidosException):
+            Paciente("Juan Pérez", "", "01/01/1990")
+    
+    def test_fecha_invalida(self):
+        with self.assertRaises(DatosInvalidosException):
+            Paciente("Juan Pérez", "12345678", "fecha_incorrecta")
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+## Explicación del Diseño General
+
+### Arquitectura del Sistema
+
+El sistema sigue una arquitectura modular basada en *separación de responsabilidades* y *programación orientada a objetos*.
+
+#### 1. Capa de Presentación (CLI)
+
+- *Archivo:* cli/cli.py (clase CLI)
+- *Responsabilidad:* Interacción con el usuario
+- *Características:*
+  - Manejo de entrada/salida con menú numerado (0-9)
+  - Validación básica de inputs (campos no vacíos)
+  - Formateo de mensajes con colores de estado (ERROR/OK)
+  - Gestión del flujo de navegación con bucle principal
+  - Manejo de KeyboardInterrupt para salida elegante
+
+#### 2. Capa de Lógica de Negocio
+
+- *Archivo principal:* src/clinica.py
+- *Responsabilidad:* Orquestar las operaciones del sistema
+- *Funcionalidades:*
+  - Gestión de pacientes, médicos y turnos
+  - Validación de reglas de negocio
+  - Coordinación entre entidades
+  - Generación de historias clínicas
+
+#### 3. Capa de Entidades/Modelos
+
+- *Archivos principales:*
+  - src/paciente.py - Gestión de datos de pacientes
+  - src/medico.py - Gestión de médicos y sus especialidades
+  - src/especialidad.py - Especialidades médicas y días de atención
+  - src/turno.py - Representación de citas médicas
+  - src/receta.py - Prescripciones médicas
+  - src/historiaclinica.py - Historiales médicos de pacientes
+- *Responsabilidad:* Representar las entidades del dominio
+- *Características:*
+  - Encapsulación completa de datos y comportamientos
+  - Validación de datos específicos de cada entidad
+  - Métodos de acceso (obtener_*()) y modificación
+  - Relaciones entre entidades bien definidas
+
+#### 4. Sistema de Excepciones
+
+- *Archivo:* src/excepciones.py
+- *Responsabilidad:* Manejo de errores específicos del dominio
+- *Tipos de excepciones implementadas:*
+  - PacienteNoEncontradoException / MedicoNoEncontradoException
+  - PacienteDuplicadoException / MedicoDuplicadoException
+  - EspecialidadDuplicadaException
+  - MedicoNoDisponibleException / TurnoOcupadoException
+  - RecetaInvalidaException / DatosInvalidosException
+
+### Principios de Diseño Aplicados
+
+#### 1. *Single Responsibility Principle (SRP)*
+
+- Cada clase tiene una responsabilidad específica
+- CLI solo maneja la interfaz de usuario
+- Cada entidad maneja solo sus propios datos
+
+#### 2. *Encapsulación*
+
+- Atributos privados con métodos de acceso
+- Validación interna en cada clase
+- Ocultación de implementación
+
+#### 3. *Manejo de Errores Estructurado*
+
+- Excepciones específicas para cada tipo de error
+- Propagación controlada de errores
+- Mensajes informativos para el usuario
+
+#### 4. *Separación de Concerns*
+
+- Lógica de presentación separada de lógica de negocio
+- Validación distribuida entre capas
+- Responsabilidades claras por módulo
+
+### Flujo de Datos Específico
+
+
+Usuario → CLI.mostrar_menu() → CLI.método_específico() → Clinica.método() → 
+Entidades (Paciente/Medico/Especialidad) → Validación → Storage en listas internas
+         ↑                                                                    ↓
+CLI.print(ERROR/OK) ← Formateo ← Excepciones específicas ← Validación ← Operación
+
+
+### Características Específicas de Implementación
+
+#### Estructura Modular Completa
+
+- *Separación clara:* CLI separado en su propio módulo
+- *Entidades independientes:* Cada clase del dominio en su archivo
+- *Testing completo:* Suite de pruebas para cada componente
+- *Organización profesional:* Uso de __init__.py para módulos apropiados
+
+#### Gestión de Imports
+
+- *Estructura de paquetes:* Uso correcto de módulos Python
+- *Imports absolutos:* from src.paciente import Paciente
+- *Sin dependencias de path:* Estructura modular estándar
+
+#### Validaciones Implementadas
+
+- *Campos vacíos:* Verificación de strip() en todos los inputs
+- *Formatos de fecha:* Parsing con datetime.strptime(fecha_hora_str, "%d/%m/%Y %H:%M")
+- *Listas de datos:* Split por comas para medicamentos y días de especialidad
+- *Duplicados:* Verificación antes de agregar entidades
+
+#### Almacenamiento y Testing
+
+- *En memoria:* Listas internas en la clase Clinica
+- *Sin persistencia:* Los datos se pierden al cerrar la aplicación
+- *Búsquedas:* Por DNI para pacientes y matrícula para médicos
+- *Testing completo:* 7 archivos de prueba cubriendo todas las entidades
+
+### Limitaciones Actuales
+
+- *Persistencia:* Los datos se almacenan solo en memoria (listas internas)
+- *Concurrencia:* No maneja acceso concurrente
+- *Escalabilidad:* Diseñado para uso local de un solo usuario
+- *Validación de fechas:* Solo formato dd/mm/aaaa HH:MM
+- *Interfaz:* Solo disponible vía línea de comandos
+
+### Extensibilidad
+
+El diseño permite fácil extensión para:
+
+- Nuevos tipos de especialidades médicas
+- Diferentes formatos de reportes
+- Integración con bases de datos
+- APIs web o interfaces gráficas
+- Sistemas de notificaciones
+
+### Consideraciones de Mantenimiento
+
+- Código modular facilita testing unitario
+- Excepciones específicas simplifican debugging
+- Separación clara de responsabilidades facilita modificaciones
+- Estructura permite agregar nuevas funcionalidades sin modificar código existente
